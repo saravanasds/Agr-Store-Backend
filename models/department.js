@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const departmentSchema = new Schema(
     {
-        department: { type: String, require: true }
+        department: { type: String, require: true },
+        departmentImage: { type: String, require: true }
     }
 )
 

@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 const categorySchema = new Schema(
     {
         category: { type: String, require: true },
-        department: { type: String, ref: 'department', required: true },
+        department: { type: String, required: true },
+        categoryImage: { type: String, require: true }
     }
 )
 

@@ -2,6 +2,7 @@ import Admin from '../models/admin.js';
 import Vendor from '../models/vendor.js';
 import bcrypt from 'bcryptjs';
 import Department from "../models/department.js";
+import Category from "../models/category.js";
 import jwt from 'jsonwebtoken';
 
 
@@ -49,20 +50,63 @@ export const loginAdmin = async (req, res) => {
 
 export const createDepartment = async (req, res) => {
   try {
-    const department = new Department(req.body);
-    await department.save();
-    return res.status(201).json({ message: "Department Created successfully..." });
+    const { department } = req.body;
+
+    if (!req.files || !req.files.departmentImage || req.files.departmentImage.length === 0) {
+      return res.status(400).json({ error: "Department image must be uploaded" });
+    }
+
+    const newDepartment = new Department({
+      department,
+      departmentImage: req.files.departmentImage[0].location,
+    });
+
+    await newDepartment.save();
+    return res.status(201).json({ message: "Department created successfully..." });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 };
 
+
 // Get all departments
 export const getAllDepartments = async (req, res) => {
   try {
     const departments = await Department.find();
     res.status(200).json(departments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const createCategory = async (req, res) => {
+  try {
+    const { category, department } = req.body;
+
+    if (!req.files || !req.files.categoryImage || req.files.categoryImage.length === 0) {
+      return res.status(400).json({ error: "Category image must be uploaded" });
+    }
+
+    const newCategory = new Category({
+      category,
+      department,
+      categoryImage: req.files.categoryImage[0].location,
+    });
+
+    console.log(newCategory);
+    await newCategory.save();
+    return res.status(201).json({ message: "Department created successfully..." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
+export const getAllCategories = async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.status(200).json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -101,7 +145,7 @@ export const addNewVendor = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(vendorPassword, 12);
-    
+
     const newVendor = new Vendor({
       department,
       shopName,
