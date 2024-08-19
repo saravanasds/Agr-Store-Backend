@@ -25,7 +25,7 @@ router.post('/login', VendorLogin);
 router.get('/all', getAllVendors);
 router.post('/category', createCategory);
 router.get('/categories', getAllCategories);
-router.get('/products', getAllProducts);
+router.get('/getAllProducts', getAllProducts);
 router.post('/getVendorProducts', getVendorProducts);
 router.put(
   '/editProduct/:id',
