@@ -9,7 +9,8 @@ import {
   getAllProducts,
   getVendorProducts,
   editProduct,
-  deleteProduct
+  deleteProduct,
+  getSingleProduct
 } from "../controllers/vendor.js";
 import { upload } from "../config/uploadConfig.js"  // Import the common upload setup
 
@@ -33,5 +34,6 @@ router.put(
   editProduct
 );
 router.delete('/deleteProduct/:id', deleteProduct);
+router.get('/getProduct/:id', getSingleProduct);
 
 export default router;
