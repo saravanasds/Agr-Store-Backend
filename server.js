@@ -6,6 +6,7 @@ import userRegisterRoute from "./routes/user.js";
 import adminRoute from "./routes/admin.js"
 import vendorRoute from "./routes/vendor.js"
 import cartRoute from "./routes/cart.js";
+import orderRoute from "./routes/order.js";
 import { dataBaseConnection } from "./config/database.js";
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/user', userRegisterRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/vendor', vendorRoute);
 app.use('/api/cart', cartRoute);
+app.use('/api/order', orderRoute);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
