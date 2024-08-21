@@ -3,6 +3,7 @@ import { uniqId } from "../uniqId.js";
 import { sendToken } from "../utils/jwt.js";
 import bcrypt from 'bcryptjs';
 
+
 const userRegister = async (req, res) => {
   try {
     const {
@@ -136,7 +137,7 @@ const UserLogin = async (req, res) => {
     
     // Correct the shadowing issue
     let user = await User.findOne({ email: email });
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       return res
@@ -175,4 +176,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-export { userRegister, getAllUsers, UserLogin };
+
+
+export { userRegister, getAllUsers, UserLogin  };
