@@ -68,4 +68,52 @@ const getCartItems = async (req, res) => {
     }
 };
 
-export { addToCart, getCartItems };
+const removeCartItem = async (req, res) => {
+    const { email, productId } = req.body;
+  
+    try {
+      // Find the cart associated with the user email
+      let cart = await Cart.findOne({ email });
+  
+      if (!cart) {
+        return res.status(404).json({ message: 'Cart not found' });
+      }
+  
+      // Remove the product from the cart
+      cart.products = cart.products.filter(
+        (product) => product.productId.toString() !== productId
+      );
+  
+      // Save the updated cart
+      await cart.save();
+  
+      res.status(200).json({ message: 'Product removed from cart successfully', cart });
+    } catch (error) {
+      console.error('Error removing product from cart:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+
+  const clearCart = async (req, res) => {
+    const { email } = req.body;
+  
+    try {
+      // Find the cart associated with the user's email
+      let cart = await Cart.findOne({ email });
+  
+      if (!cart) {
+        return res.status(404).json({ message: 'Cart not found' });
+      }
+  
+      // Clear the cart by setting products to an empty array
+      cart.products = [];
+      await cart.save();
+  
+      res.status(200).json({ message: 'Cart cleared successfully' });
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+
+export { addToCart, getCartItems, removeCartItem, clearCart };
