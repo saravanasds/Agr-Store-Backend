@@ -7,7 +7,8 @@ import {
   createDepartment,
   createCategory,
   getAllDepartments,
-  getAllCategories
+  getAllCategories,
+  getAllAdmins
 } from "../controllers/adminController.js";
 import { upload } from "../config/uploadConfig.js";  // Import the common upload setup
 
@@ -15,6 +16,7 @@ const router = express.Router();
 
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
+router.get('/all', getAllAdmins);
 router.post('/addNewVendor', addNewVendor);
 router.post(
   '/createDepartment',

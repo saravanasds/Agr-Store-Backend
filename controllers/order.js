@@ -1,4 +1,5 @@
 import Order from "../models/order.js";
+import Vendor from "../models/vendor.js";
 
 export const placeOrder = async (req, res) => {
     try {
@@ -23,7 +24,6 @@ export const getAllOrders = async (req, res) => {
         if (orders.length === 0) {
             return res.status(404).json({ message: 'No orders found' });
         }
-
         res.status(200).json({ orders });
     } catch (error) {
         console.error('Error fetching orders:', error);

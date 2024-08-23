@@ -63,7 +63,7 @@ const createCategory = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { vendorEmail, productName, category, description, unit, price, department } = req.body;
+    const { vendorEmail, productName, category, description, unit, price, department, shopName } = req.body;
 
     if (!req.files || !req.files.productImage || req.files.productImage.length === 0) {
       return res.status(400).json({ error: "Product image must be uploaded" });
@@ -71,18 +71,19 @@ const createProduct = async (req, res) => {
 
     // Find and update the counter
     const productCounter = await ProductCounter.findOneAndUpdate(
-      { name: 'productId' },
+      { name: 'productCode' },
       { $inc: { value: 1 } },
       { new: true, upsert: true }
     );
 
     // Generate the new product ID
-    const productId = `PROD${String(productCounter.value).padStart(3, '0')}`;
+    const productCode = `PROD${String(productCounter.value).padStart(3, '0')}`;
 
     const product = new Product({
-      productId, // Use the generated product ID
+      productCode, // Use the generated product ID
       vendorEmail,
       department,
+      shopName,
       productImage: req.files.productImage[0].location,
       productName,
       category,

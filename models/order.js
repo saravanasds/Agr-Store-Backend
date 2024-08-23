@@ -5,13 +5,16 @@ const orderSchema = new mongoose.Schema({
     products: [
         {
             productId: { type: mongoose.Schema.Types.ObjectId, require: true },
+            productCode: { type: String, require: true },
             productName: { type: String, require: true },
             vendorEmail: { type: String, require: true },
+            shopName: { type: String, require: true },
             productImage: { type: String, require: true },
             quantity: { type: String, require: true },
             price: { type: String, require: true },
             total: { type: String, require: true },
             orderStatus: { type: String, default: 'Processing' },
+            createdAt: { type: Date, default: Date.now },
         },
     ],
     name: { type: String, require: true },

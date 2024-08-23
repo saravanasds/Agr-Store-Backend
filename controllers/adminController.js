@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 
 
 export const registerAdmin = async (req, res) => {
-  const { email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,7 +23,7 @@ export const registerAdmin = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const newAdmin = new Admin({ email, password: hashedPassword });
+    const newAdmin = new Admin({ name, email, password: hashedPassword, role });
     await newAdmin.save();
 
     res.status(201).json({ message: 'Admin registered successfully' });
@@ -42,9 +42,19 @@ export const loginAdmin = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
 
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.status(200).json({ token });
+    res.status(200).json({ token, data:admin });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getAllAdmins = async (req, res) => {
+  try {
+    const admins = await Admin.find({});
+    res.status(200).json(admins);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

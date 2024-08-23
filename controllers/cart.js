@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 // Add product to cart
 const addToCart = async (req, res) => {
-    const { email, productId, quantity, unit, price, productImage } = req.body;
+    const { email, productId, quantity, unit, price, productImage, shopName, productCode } = req.body;
     console.log(req.body);
 
     try {
@@ -23,7 +23,7 @@ const addToCart = async (req, res) => {
                 cart.products[productIndex].quantity += quantity;
             } else {
                 // Add new product to cart
-                cart.products.push({ productId: objectId, quantity, unit, price, productImage });
+                cart.products.push({ productId: objectId, quantity, unit, price, productImage, shopName, productCode });
             }
         } else {
             // Create a new cart if it doesn't exist
@@ -31,6 +31,8 @@ const addToCart = async (req, res) => {
                 email,
                 products: [{
                     productId: objectId,
+                    productCode,
+                    shopName,
                     quantity,
                     unit,
                     price, 
@@ -50,12 +52,14 @@ const addToCart = async (req, res) => {
 const getCartItems = async (req, res) => {
     try {
         const { email } = req.body; // Get email from the request body
+        console.log("test", email)
 
         if (!email) {
             return res.status(400).json({ message: 'Email is required' });
         }
 
-        const cart = await Cart.findOne({ userEmail: email }).populate('products.productId');
+        const cart = await Cart.findOne({ email }).populate('products.productId'); 
+        console.log("test products", cart);
 
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
