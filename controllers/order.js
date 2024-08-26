@@ -53,19 +53,19 @@ export const getUserOrders = async (req, res) => {
 
 export const getOrderProductsByVendorEmail = async (req, res) => {
     const { vendorEmail } = req.params;
-    
+
 
     try {
         // Find all orders
         const orders = await Order.find({ 'products.vendorEmail': vendorEmail });
-        
+
 
         if (!orders || orders.length === 0) {
             return res.status(404).json({ message: 'No orders found for this vendor' });
         }
 
         // Extract the products associated with the given vendorEmail
-        const products = orders.flatMap(order => 
+        const products = orders.flatMap(order =>
             order.products.filter(product => product.vendorEmail === vendorEmail)
         );
         // console.log(products)
@@ -74,5 +74,42 @@ export const getOrderProductsByVendorEmail = async (req, res) => {
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const updateOrderStatus = async (req, res) => {
+    const { id } = req.params;
+    const { orderStatus } = req.body;
+
+    try {
+        // Update the order status
+        const order = await Order.findByIdAndUpdate(
+            id,
+            { orderStatus },
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        // Update the order status inside each product
+        const updatedOrder = await Order.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    "products.$[elem].orderStatus": orderStatus,
+                },
+            },
+            {
+                arrayFilters: [{ "elem.productId": { $exists: true } }],
+                new: true,
+            }
+        );
+
+        res.status(200).json({ message: 'Order status updated successfully', order: updatedOrder });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error updating order status', error });
     }
 };
