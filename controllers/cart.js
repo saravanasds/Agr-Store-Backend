@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 // Add product to cart
 const addToCart = async (req, res) => {
-    const { email, productId, quantity, unit, price, productImage, shopName, productCode } = req.body;
+    const { email, productId, quantity, unit, actualPrice, price, balance, productImage, shopName, productCode, vendorCommission } = req.body;
     // console.log(req.body);
 
     try {
@@ -23,7 +23,7 @@ const addToCart = async (req, res) => {
                 cart.products[productIndex].quantity += quantity;
             } else {
                 // Add new product to cart
-                cart.products.push({ productId: objectId, quantity, unit, price, productImage, shopName, productCode });
+                cart.products.push({ productId: objectId, quantity, actualPrice, unit, price, balance, productImage, shopName, productCode, vendorCommission });
             }
         } else {
             // Create a new cart if it doesn't exist
@@ -32,10 +32,13 @@ const addToCart = async (req, res) => {
                 products: [{
                     productId: objectId,
                     productCode,
+                    vendorCommission,
                     shopName,
                     quantity,
                     unit,
+                    actualPrice,
                     price, 
+                    balance,
                     productImage
                 }],
             });

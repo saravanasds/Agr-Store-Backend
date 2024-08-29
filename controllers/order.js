@@ -24,7 +24,7 @@ export const placeOrder = async (req, res) => {
             }
         } else {
             // Validate Razorpay payment details for online payments
-            if (!razorpayPaymentId ) {
+            if (!razorpayPaymentId) {
                 return res.status(400).json({ message: 'Missing payment details for online payment' });
             }
         }
@@ -152,3 +152,45 @@ export const updateOrderStatus = async (req, res) => {
         res.status(500).json({ message: 'Error updating order status', error });
     }
 };
+
+
+
+export const getVendorBalanceSums = async (req, res) => {
+    try {
+        const balanceSums = await Order.aggregate([
+            { $unwind: "$products" }, // Unwind the products array
+            { $match: { "products.orderStatus": "Completed" } }, // Match only completed orders
+            {
+                $group: {
+                    _id: {
+                        vendorEmail: "$products.vendorEmail",
+                        shopName: "$products.shopName"
+                    },
+                    totalBalance: {
+                        $sum: { $toDouble: "$products.balance" } // Convert balance to double before summing
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    vendorEmail: "$_id.vendorEmail",
+                    shopName: "$_id.shopName",
+                    totalBalance: 1
+                }
+            },
+            { $match: { totalBalance: { $gt: 0 } } } // Filter out groups with totalBalance of 0
+        ]);
+
+        res.status(200).json(balanceSums);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching balance sums', error });
+    }
+};
+
+
+
+
+
+
+

@@ -63,7 +63,7 @@ const createCategory = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { vendorEmail, productName, category, description, unit, price, department, shopName } = req.body;
+    const { vendorEmail, vendorCommission, productName, category, description, unit, actualPrice, price, balance, department, shopName } = req.body;
 
     if (!req.files || !req.files.productImage || req.files.productImage.length === 0) {
       return res.status(400).json({ error: "Product image must be uploaded" });
@@ -82,6 +82,7 @@ const createProduct = async (req, res) => {
     const product = new Product({
       productCode, // Use the generated product ID
       vendorEmail,
+      vendorCommission,
       department,
       shopName,
       productImage: req.files.productImage[0].location,
@@ -89,7 +90,9 @@ const createProduct = async (req, res) => {
       category,
       description,
       unit,
+      actualPrice,
       price,
+      balance
     });
 
     // console.log(product);
