@@ -104,7 +104,7 @@ export const createCategory = async (req, res) => {
       categoryImage: req.files.categoryImage[0].location,
     });
 
-    console.log(newCategory);
+    // console.log(newCategory);
     await newCategory.save();
     return res.status(201).json({ message: "Department created successfully..." });
   } catch (error) {

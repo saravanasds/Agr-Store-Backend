@@ -23,6 +23,10 @@ const orderSchema = new mongoose.Schema({
     pincode: { type: String, require: true },
     totalAmount: { type: String, require: true },
     orderStatus: { type: String, default: 'Processing' },
+    razorpayPaymentId: { type: String },
+    razorpayOrderId: { type: String },
+    razorpaySignature: { type: String },
+    paymentMethod: { type: String, require: true },
     createdAt: { type: Date, default: Date.now },
 });
 

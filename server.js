@@ -8,37 +8,24 @@ import vendorRoute from "./routes/vendor.js"
 import cartRoute from "./routes/cart.js";
 import orderRoute from "./routes/order.js";
 import { dataBaseConnection } from "./config/database.js";
+import Razorpay from 'razorpay';
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 dotenv.config();
 
-// Middleware
-// const allowedOrigins = [process.env.FRONTEND_URL, process.env.ADMIN_DASHBOARD_URL];
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (allowedOrigins.includes(origin) || !origin) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true,
-// };
-
-// app.use(cors(corsOptions));/
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// MongoDB connection
-// const mongoURI = process.env.MONGODB_URI;
-// mongoose.connect(mongoURI)
-//   .then(() => console.log('MongoDB connected'))
-//   .catch(err => console.log(err));
 dataBaseConnection();
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 // Routes
 app.use('/api/user', userRegisterRoute);
@@ -46,6 +33,25 @@ app.use('/api/admin', adminRoute);
 app.use('/api/vendor', vendorRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/order', orderRoute);
+
+// Example route to create Razorpay order (if needed)
+app.post('/api/order/createOrder', async (req, res) => {
+    try {
+        const { amount, currency, receipt } = req.body;
+        // console.log('Order data:', req.body);
+        const options = {
+            amount: amount * 100, // amount in smallest currency unit
+            currency,
+            receipt,
+        };
+        const order = await razorpay.orders.create(options);
+        // console.log(order);
+        res.json(order);
+    } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        res.status(500).json({ message: 'Failed to create Razorpay order', error: error.message });
+    }
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

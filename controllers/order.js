@@ -1,20 +1,59 @@
 import Order from "../models/order.js";
-import Vendor from "../models/vendor.js";
+
 
 export const placeOrder = async (req, res) => {
     try {
-        const orderData = req.body;
+        const {
+            name, email, address, pincode, totalAmount, mobileNumber,
+            razorpayPaymentId, razorpayOrderId, razorpaySignature,
+            paymentMethod, products
+        } = req.body;
+
+        // console.log("order details", req.body);
+
+        // Validate required fields
+        if (!name || !email || !address || !pincode || !totalAmount || !mobileNumber || !paymentMethod || !products) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Handle COD specific logic
+        if (paymentMethod === 'COD') {
+            // Ensure no online payment details are provided for COD
+            if (razorpayPaymentId || razorpayOrderId || razorpaySignature) {
+                return res.status(400).json({ message: 'Payment details should be omitted for COD orders' });
+            }
+        } else {
+            // Validate Razorpay payment details for online payments
+            if (!razorpayPaymentId ) {
+                return res.status(400).json({ message: 'Missing payment details for online payment' });
+            }
+        }
 
         // Create and save the order
-        const newOrder = new Order(orderData);
+        const newOrder = new Order({
+            name,
+            email,
+            address,
+            mobileNumber,
+            pincode,
+            totalAmount,
+            razorpayPaymentId: paymentMethod === 'COD' ? undefined : razorpayPaymentId,
+
+            paymentMethod,
+            products,
+            orderStatus: 'Processing', // Default status or based on your logic
+            createdAt: new Date()
+        });
+
         await newOrder.save();
 
-        res.status(200).json({ message: 'Order placed successfully' });
+        return res.status(201).json({ message: 'Order placed successfully', order: newOrder });
     } catch (error) {
         console.error('Error placing order:', error);
-        res.status(500).json({ message: 'Failed to place order' });
+        res.status(500).json({ message: 'Failed to place order', error: error.message });
     }
 };
+
 
 export const getAllOrders = async (req, res) => {
     try {

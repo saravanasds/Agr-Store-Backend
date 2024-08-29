@@ -11,7 +11,7 @@ const VendorLogin = async (req, res) => {
     // console.log(vendorEmail);
 
     let vendor = await Vendor.findOne({ vendorEmail: vendorEmail });
-    console.log(vendor);
+    // console.log(vendor);
 
     if (!vendor) {
       return res
@@ -52,7 +52,7 @@ const createCategory = async (req, res) => {
   try {
     const { category, department } = req.body;
     const newCategory = new Category({ category, department });
-    console.log(newCategory);
+    // console.log(newCategory);
     await newCategory.save();
     res.status(201).send(newCategory);
   } catch (error) {
@@ -92,7 +92,7 @@ const createProduct = async (req, res) => {
       price,
     });
 
-    console.log(product);
+    // console.log(product);
     await product.save();
     res.status(201).json(product);
   } catch (error) {
@@ -115,7 +115,7 @@ const editProduct = async (req, res) => {
       productImage = req.files.productImage[0].location;
     }
 
-    console.log(req.body);
+    // console.log(req.body);
 
     // Find the product by its ID
     const product = await Product.findById(id);
