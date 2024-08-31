@@ -48,6 +48,21 @@ const getAllVendors = async (req, res) => {
   }
 };
 
+const getVendorByEmail = async (req, res) => {
+  try {
+    const vendorEmail = req.params.vendorEmail;
+    const vendor = await Vendor.findOne({ vendorEmail: vendorEmail });
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+    res.status(200).json(vendor);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 const createCategory = async (req, res) => {
   try {
     const { category, department } = req.body;
@@ -206,6 +221,7 @@ const getSingleProduct = async (req, res) => {
 export {
   VendorLogin,
   getAllVendors,
+  getVendorByEmail,
   createCategory,
   createProduct,
   getAllCategories,

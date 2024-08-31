@@ -14,6 +14,7 @@ const orderSchema = new mongoose.Schema({
             quantity: { type: String, require: true },
             actualPrice: { type: String, require: true },
             price: { type: String, require: true },
+            commissionAmount: { type: Number, require: true },
             balance: { type: String, require: true },
             total: { type: String, require: true },
             orderStatus: { type: String, default: 'Processing' },
@@ -30,6 +31,7 @@ const orderSchema = new mongoose.Schema({
     razorpayOrderId: { type: String },
     razorpaySignature: { type: String },
     paymentMethod: { type: String, require: true },
+    totalCommission: { type: Number, require: true },
     createdAt: { type: Date, default: Date.now },
 });
 

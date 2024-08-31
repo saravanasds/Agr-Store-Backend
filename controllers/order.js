@@ -1,4 +1,6 @@
 import Order from "../models/order.js";
+import SoldProduct from "../models/soldProduct.js";
+import Vendor from "../models/vendor.js";
 
 
 export const placeOrder = async (req, res) => {
@@ -6,13 +8,13 @@ export const placeOrder = async (req, res) => {
         const {
             name, email, address, pincode, totalAmount, mobileNumber,
             razorpayPaymentId, razorpayOrderId, razorpaySignature,
-            paymentMethod, products
+            paymentMethod, totalCommission, products
         } = req.body;
 
         // console.log("order details", req.body);
 
         // Validate required fields
-        if (!name || !email || !address || !pincode || !totalAmount || !mobileNumber || !paymentMethod || !products) {
+        if (!name || !email || !address || !pincode || !totalAmount || !mobileNumber || !paymentMethod || !totalCommission || !products) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
@@ -40,6 +42,7 @@ export const placeOrder = async (req, res) => {
             razorpayPaymentId: paymentMethod === 'COD' ? undefined : razorpayPaymentId,
 
             paymentMethod,
+            totalCommission,
             products,
             orderStatus: 'Processing', // Default status or based on your logic
             createdAt: new Date()
@@ -116,6 +119,8 @@ export const getOrderProductsByVendorEmail = async (req, res) => {
     }
 };
 
+
+
 export const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { orderStatus } = req.body;
@@ -146,13 +151,45 @@ export const updateOrderStatus = async (req, res) => {
             }
         );
 
+        // If order status is "Completed", store products in SoldProduct collection and update vendor balances
+        if (orderStatus === 'Completed') {
+            const soldProducts = updatedOrder.products.map(product => ({
+                productId: product.productId,
+                productCode: product.productCode,
+                shopName: product.shopName,
+                vendorEmail: product.vendorEmail,
+                productName: product.productName,
+                total: product.total,
+                commissionAmount: product.commissionAmount,
+                balance: product.balance,
+                quantity: product.quantity,
+            }));
+
+            // Store sold products
+            await SoldProduct.insertMany(soldProducts);
+
+            // Calculate the total balance for each vendor and update their balance
+            for (const product of soldProducts) {
+                await Vendor.findOneAndUpdate(
+                    { vendorEmail: product.vendorEmail },
+                    {
+                        $inc: {
+                            vendorBalance: product.balance,
+                            totalSaleAmount: product.total,   
+                            commissionAmount: product.commissionAmount  
+                        }
+                    },
+                    { new: true }
+                );
+            }
+        }
+
         res.status(200).json({ message: 'Order status updated successfully', order: updatedOrder });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Error updating order status', error });
     }
 };
-
 
 
 export const getVendorBalanceSums = async (req, res) => {

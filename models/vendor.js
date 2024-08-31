@@ -18,6 +18,9 @@ const VendorSchema = new Schema(
         vendorCommision: { type: String, required: true },
         shopAddress: { type: String, required: true },
         vendorPassword: { type: String, required: true },
+        totalSaleAmount: { type: Number, default: 0 },
+        vendorBalance: { type: Number, default: 0 },
+        commissionAmount: { type: Number, default: 0 },
         role: { type: String, default: "vendor"}
     },
     { timestamps: true }

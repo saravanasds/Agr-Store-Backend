@@ -3,6 +3,7 @@ import express from "express";
 import {
   VendorLogin,
   getAllVendors,
+  getVendorByEmail,
   createCategory,
   createProduct,
   getAllCategories,
@@ -24,6 +25,7 @@ router.post(
 
 router.post('/login', VendorLogin);
 router.get('/all', getAllVendors);
+router.get('/getVendorByEmail/:vendorEmail', getVendorByEmail);
 router.post('/category', createCategory);
 router.get('/categories', getAllCategories);
 router.get('/getAllProducts', getAllProducts);
