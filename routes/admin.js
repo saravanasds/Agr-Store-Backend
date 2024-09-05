@@ -8,7 +8,12 @@ import {
   createCategory,
   getAllDepartments,
   getAllCategories,
-  getAllAdmins
+  getAllAdmins,
+  payHistory,
+  getAllPayHistories,
+  getVendorCommissions,
+  getPayHistoriesByVendorEmail,
+  distributeUserShare
 } from "../controllers/adminController.js";
 import { upload } from "../config/uploadConfig.js";  // Import the common upload setup
 
@@ -30,5 +35,10 @@ router.post(
   );
 router.get('/getAllDepartments', getAllDepartments);
 router.get('/getAllCategories', getAllCategories);
+router.post('/payVendor', payHistory);
+router.get('/getAllPayHistories', getAllPayHistories);
+router.get('/getVendorCommissions', getVendorCommissions);
+router.get('/getPayHistoriesByVendorEmail/:vendorEmail', getPayHistoriesByVendorEmail);
+router.post('/distributeUserShare', distributeUserShare);
 
 export default router;

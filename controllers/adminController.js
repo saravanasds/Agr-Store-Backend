@@ -1,9 +1,12 @@
 import Admin from '../models/admin.js';
 import Vendor from '../models/vendor.js';
+import PayHistory from '../models/payHistory.js';
+import SoldProduct from '../models/soldProduct.js';
 import bcrypt from 'bcryptjs';
 import Department from "../models/department.js";
 import Category from "../models/category.js";
 import jwt from 'jsonwebtoken';
+import User from '../models/user.js';
 
 
 export const registerAdmin = async (req, res) => {
@@ -42,7 +45,7 @@ export const loginAdmin = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
 
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.status(200).json({ token, data:admin });
+    res.status(200).json({ token, data: admin });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -180,3 +183,136 @@ export const addNewVendor = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const payHistory = async (req, res) => {
+  try {
+    const { vendorEmail, shopName, paymentAmount, transactionId } = req.body;
+
+    const newPayHistory = new PayHistory({
+      vendorEmail,
+      shopName,
+      paymentAmount,
+      transactionId,
+    });
+
+    await newPayHistory.save();
+
+    const vendor = await Vendor.findOne({ vendorEmail: vendorEmail });
+    if (vendor) {
+      vendor.totalSaleAmount = 0;
+      vendor.vendorBalance = 0;
+      vendor.commissionAmount = 0;
+      await vendor.save();
+    }
+
+    res.status(201).json({ message: "Payment history added and vendor balances reset successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+export const getAllPayHistories = async (req, res) => {
+  try {
+    const payHistories = await PayHistory.find();
+    res.status(200).json(payHistories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getPayHistoriesByVendorEmail = async (req, res) => {
+  try {
+    const vendorEmail = req.params.vendorEmail;
+  
+    const payHistories = await PayHistory.find({ vendorEmail: vendorEmail });
+
+    if (!payHistories) {
+      return res.status(404).json({ message: "Payment History not found" });
+    }
+
+    res.status(200).json(payHistories);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const getVendorCommissions = async (req, res) => {
+  try {
+    // Group by vendorEmail and sum the commissionAmount for each vendor
+    const vendorCommissions = await SoldProduct.aggregate([
+      {
+        $group: {
+          _id: {
+            vendorEmail: '$vendorEmail',
+            shopName: '$shopName',
+          }, // Group by vendorEmail and shopName
+          totalCommission: { $sum: '$commissionAmount' }, // Sum the commissionAmount for each vendor and shop
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field from the result
+          vendorEmail: '$_id.vendorEmail',
+          shopName: '$_id.shopName',
+          totalCommission: 1, // Include totalCommission in the result
+        },
+      },
+    ]);
+
+    // Calculate the total commission sum across all vendors
+    const totalCommission = await SoldProduct.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalCommission: { $sum: '$commissionAmount' },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      vendorCommissions,
+      totalCommission: totalCommission[0]?.totalCommission || 0, // Total commission sum
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+export const distributeUserShare = async (req, res) => {
+  try {
+    const { totalUserShare } = req.body; // The total user share to be distributed
+
+    // Fetch all users
+    const users = await User.find();
+
+    if (users.length === 0) {
+      return res.status(400).json({ message: 'No users found' });
+    }
+
+    // Calculate individual user share
+    const individualShare = totalUserShare / users.length;
+
+    // Update each user's share in the database
+    const userUpdatePromises = users.map(user => {
+      user.userShare = individualShare.toFixed(2);
+      return user.save();
+    });
+
+    await Promise.all(userUpdatePromises);
+
+    res.status(200).json({ message: 'User share distributed successfully' });
+  } catch (error) {
+    console.error('Error distributing user share:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+
+

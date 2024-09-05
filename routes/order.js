@@ -5,7 +5,8 @@ import {
     getAllOrders, 
     getOrderProductsByVendorEmail, 
     updateOrderStatus, 
-    getVendorBalanceSums } from "../controllers/order.js";
+    getVendorBalanceSums,
+    getAllSoldProducts } from "../controllers/order.js";
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.get('/getAllOrders', getAllOrders);
 router.get('/getVendorOrders/:vendorEmail', getOrderProductsByVendorEmail);
 router.put('/updateOrderStatus/:id', updateOrderStatus);
 router.get('/getVendorBalanceSums', getVendorBalanceSums);
+router.get('/getAllSoldProducts', getAllSoldProducts);
 
 export default router;

@@ -37,4 +37,4 @@ const uniqId = async () => {
   return activationToken;
 };
 
-export { uniqId };
+export { uniqId }; 
