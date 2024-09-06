@@ -19,7 +19,7 @@ export const placeOrder = async (req, res) => {
             !address ||
             !pincode ||
             !totalAmount ||
-            !discount ||
+            // !discount ||
             !mobileNumber ||
             !paymentMethod ||
             !totalCommission ||

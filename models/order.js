@@ -26,7 +26,7 @@ const orderSchema = new mongoose.Schema({
     mobileNumber: { type: String, require: true },
     pincode: { type: String, require: true },
     totalAmount: { type: Number, require: true },
-    discount: { type: Number, require: true },
+    discount: { type: Number, default:0 },
     orderStatus: { type: String, default: 'Processing' },
     razorpayPaymentId: { type: String },
     razorpayOrderId: { type: String },
