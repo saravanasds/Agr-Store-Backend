@@ -8,15 +8,16 @@ import ProductCounter from "../models/productCounter.js";
 const VendorLogin = async (req, res) => {
   try {
     const { vendorEmail, vendorPassword } = req.body;
-    // console.log(vendorEmail);
 
     let vendor = await Vendor.findOne({ vendorEmail: vendorEmail });
-    // console.log(vendor);
 
     if (!vendor) {
-      return res
-        .status(400)
-        .json({ message: "vendor not found, please check email..." });
+      return res.status(400).json({ message: "Vendor not found, please check email." });
+    }
+
+    // Check if the vendor is enabled
+    if (vendor.status !== 'enabled') {
+      return res.status(403).json({ message: "Vendor is disabled. Contact admin for more information." });
     }
 
     const isMatch = await bcrypt.compare(vendorPassword, vendor.vendorPassword);
@@ -26,18 +27,17 @@ const VendorLogin = async (req, res) => {
 
     const token = sendToken(vendor);
 
-    return res
-      .status(200)
-      .json({
-        message: "vendor logged in successfully...",
-        data: vendor,
-        token,
-      });
+    return res.status(200).json({
+      message: "Vendor logged in successfully...",
+      data: vendor,
+      token,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 };
+
 
 const getAllVendors = async (req, res) => {
   try {
@@ -47,6 +47,33 @@ const getAllVendors = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const updateVendorStatus = async (req, res) => {
+  try {
+    const { id } = req.params;  // Vendor ID passed as URL parameter
+    const { status } = req.body; // Status passed in the request body
+
+    if (!['enabled', 'disabled'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const vendor = await Vendor.findByIdAndUpdate(
+      id,
+      { status: status },
+      { new: true }
+    );
+
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    res.status(200).json({ message: `Vendor ${status} successfully`, vendor });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
 
 const getVendorByEmail = async (req, res) => {
   try {
@@ -229,5 +256,6 @@ export {
   getVendorProducts,
   editProduct,
   deleteProduct,
-  getSingleProduct
+  getSingleProduct,
+  updateVendorStatus
 };

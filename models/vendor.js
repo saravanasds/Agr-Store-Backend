@@ -21,7 +21,8 @@ const VendorSchema = new Schema(
         totalSaleAmount: { type: Number, default: 0 },
         vendorBalance: { type: Number, default: 0 },
         commissionAmount: { type: Number, default: 0 },
-        role: { type: String, default: "vendor"}
+        role: { type: String, default: "vendor"},
+        status: { type: String, enum: ['enabled', 'disabled'], default: 'enabled' },
     },
     { timestamps: true }
 );
