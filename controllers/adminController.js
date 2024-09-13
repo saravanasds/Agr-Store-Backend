@@ -7,6 +7,7 @@ import Department from "../models/department.js";
 import Category from "../models/category.js";
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
+import OfferProduct from '../models/offerProducts.js';
 
 
 export const registerAdmin = async (req, res) => {
@@ -65,17 +66,62 @@ export const createDepartment = async (req, res) => {
   try {
     const { department } = req.body;
 
-    if (!req.files || !req.files.departmentImage || req.files.departmentImage.length === 0) {
-      return res.status(400).json({ error: "Department image must be uploaded" });
+    if (!req.files || !req.files.departmentImage || !req.files.coverImage) {
+      return res.status(400).json({ error: "Both department image and cover image must be uploaded" });
     }
 
     const newDepartment = new Department({
       department,
-      departmentImage: req.files.departmentImage[0].location,
+      departmentImage: req.files.departmentImage[0].location, 
+      coverImage: req.files.coverImage[0].location,           
     });
 
     await newDepartment.save();
     return res.status(201).json({ message: "Department created successfully..." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
+export const editDepartment = async (req, res) => {
+  try {
+    const { id } = req.params; 
+
+    // Initialize variables to hold the new images if provided
+    let departmentImage;
+    let coverImage;
+
+    // Check if departmentImage is present in the request
+    if (req.files && req.files.departmentImage && req.files.departmentImage.length > 0) {
+      departmentImage = req.files.departmentImage[0].location;
+    }
+
+    // Check if coverImage is present in the request
+    if (req.files && req.files.coverImage && req.files.coverImage.length > 0) {
+      coverImage = req.files.coverImage[0].location;
+    }
+
+    // Find the department by ID
+    const department = await Department.findById(id);
+    if (!department) {
+      return res.status(404).json({ error: "Department not found" });
+    }
+
+    // Only update departmentImage if a new one is provided
+    if (departmentImage) {
+      department.departmentImage = departmentImage;
+    }
+
+    // Only update coverImage if a new one is provided 
+    if (coverImage) {
+      department.coverImage = coverImage;
+    }
+
+    // Save the updated department
+    await department.save();
+
+    res.status(200).json({ message: "Department updated successfully", department });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error", error });
@@ -309,6 +355,126 @@ export const distributeUserShare = async (req, res) => {
   } catch (error) {
     console.error('Error distributing user share:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const offerProduct = async (req, res) => {
+  try {
+    const { 
+      productCode,
+      vendorEmail, 
+      vendorCommission, 
+      productName, 
+      category, 
+      description, 
+      unit, 
+      actualPrice, 
+      price, 
+      balance, 
+      department, 
+      shopName,
+      productImage // Assume this might come as a string if no file is uploaded
+    } = req.body;
+
+    // Check if the product image was uploaded via form-data
+    let uploadedProductImage;
+    if (req.files && req.files.productImage && req.files.productImage.length > 0) {
+      uploadedProductImage = req.files.productImage[0].location; // Using the uploaded image URL
+    } else if (productImage) {
+      // Use the existing productImage from the request body (if passed)
+      uploadedProductImage = productImage;
+    } else {
+      return res.status(400).json({ error: "Product image must be uploaded or provided." });
+    }
+
+    // Create the new offer product with all fields, including the image
+    const offerProduct = new OfferProduct({
+      productCode, 
+      vendorEmail,
+      vendorCommission,
+      department,
+      shopName,
+      productImage: uploadedProductImage, // Use either uploaded or provided image
+      productName,
+      category,
+      description,
+      unit,
+      actualPrice,
+      price,
+      balance
+    });
+
+    // Save the new offer product to the database
+    await offerProduct.save();
+    res.status(201).json(offerProduct);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
+export const getAllOfferProducts = async (req, res) => {
+  try {
+    const products = await OfferProduct.find()
+    res.status(200).json(products);
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const editOfferProduct = async (req, res) => {
+  try {
+    const { id } = req.params; // Assuming productId is passed as a URL parameter
+    const { productName, category, description, unit, actualPrice, price } = req.body;
+
+    // Check if there's a new product image uploaded
+    let productImage;
+    if (req.files && req.files.productImage && req.files.productImage.length > 0) {
+      productImage = req.files.productImage[0].location;
+    }
+
+    // console.log(req.body);
+
+    // Find the product by its ID
+    const product = await OfferProduct.findById(id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Update only specified product fields
+    if (productName) product.productName = productName;  
+    if (category) product.category = category;
+    if (description) product.description = description;
+    if (unit) product.unit = unit;
+    if (actualPrice) product.actualPrice = actualPrice;
+    if (price) product.price = price;
+    if (productImage) product.productImage = productImage;
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({ message: "Product updated successfully", product });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
+export const deleteOfferProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the product by its ID and delete it
+    const product = await OfferProduct.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Internal server error", error });
   }
 };
 
