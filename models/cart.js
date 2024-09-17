@@ -5,8 +5,9 @@ const CartSchema = new mongoose.Schema({
     email: { type: String, ref: 'User', required: true },
     products: [
       {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         productCode: { type: String, require: true },
+        productName: { type: String, require: true },
+        vendorEmail: { type: String, require: true },
         vendorCommission: { type: String, require: true },
         shopName: { type: String, require: true },
         quantity: { type: Number, default: 1 },

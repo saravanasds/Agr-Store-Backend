@@ -4,7 +4,6 @@ const orderSchema = new mongoose.Schema({
     email: { type: String, require: true },
     products: [
         {
-            productId: { type: mongoose.Schema.Types.ObjectId, require: true },
             productCode: { type: String, require: true },
             vendorCommission: { type: String, require: true },
             productName: { type: String, require: true },

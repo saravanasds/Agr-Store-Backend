@@ -16,7 +16,8 @@ const offerProductSchema = new Schema(
         actualPrice: { type: String, require: true },
         price: { type: Number, require: true },
         balance: { type: Number, require: true },
-        productImage: { type: String, require: true }
+        productImage: { type: String, require: true }, 
+        offered: {type: String, default: "true"}
     },
     { timestamps: true }
 )

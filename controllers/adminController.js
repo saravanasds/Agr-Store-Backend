@@ -366,7 +366,7 @@ export const offerProduct = async (req, res) => {
       vendorCommission, 
       productName, 
       category, 
-      description, 
+      description,  
       unit, 
       actualPrice, 
       price, 

@@ -173,7 +173,7 @@ export const updateOrderStatus = async (req, res) => {
                 },
             },
             {
-                arrayFilters: [{ "elem.productId": { $exists: true } }],
+                arrayFilters: [{ "elem.productCode": { $exists: true } }],
                 new: true,
             }
         );
@@ -181,7 +181,7 @@ export const updateOrderStatus = async (req, res) => {
         // Handle 'Completed' status
         if (orderStatus === 'Completed') {
             const soldProducts = updatedOrder.products.map(product => ({
-                productId: product.productId,
+                // productId: product.productId,
                 productCode: product.productCode,
                 shopName: product.shopName,
                 vendorEmail: product.vendorEmail,
