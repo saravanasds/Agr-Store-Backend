@@ -376,6 +376,12 @@ export const offerProduct = async (req, res) => {
       productImage // Assume this might come as a string if no file is uploaded
     } = req.body;
 
+    // Check if the product with the same productCode already exists
+    const existingProduct = await OfferProduct.findOne({ productCode });
+    if (existingProduct) {
+      return res.status(400).json({ message: "Product with this product code already exists." });
+    }
+
     // Check if the product image was uploaded via form-data
     let uploadedProductImage;
     if (req.files && req.files.productImage && req.files.productImage.length > 0) {
@@ -412,6 +418,7 @@ export const offerProduct = async (req, res) => {
     return res.status(500).json({ message: "Internal server error", error });
   }
 };
+
 
 export const getAllOfferProducts = async (req, res) => {
   try {

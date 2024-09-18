@@ -190,6 +190,7 @@ export const updateOrderStatus = async (req, res) => {
                 commissionAmount: product.commissionAmount,
                 balance: product.balance,
                 quantity: product.quantity,
+                offered: product.offered || " ",
             }));
 
             await SoldProduct.insertMany(soldProducts);

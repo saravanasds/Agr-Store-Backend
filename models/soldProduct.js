@@ -9,7 +9,7 @@ const SoldProductSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     commissionAmount: { type: Number, require: true },
     balance: { type: Number, required: true },
-    // orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
+    offered: { type: String },
     soldAt: { type: Date, default: Date.now }
 });
 
