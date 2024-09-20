@@ -8,6 +8,7 @@ import Category from "../models/category.js";
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import OfferProduct from '../models/offerProducts.js';
+import Setting from '../models/setting.js';
 
 
 export const registerAdmin = async (req, res) => {
@@ -484,6 +485,105 @@ export const deleteOfferProduct = async (req, res) => {
     res.status(500).json({ message: "Internal server error", error });
   }
 };
+
+
+// Create a new setting
+export const createSetting = async (req, res) => {
+  try {
+    // Access offerImage path
+    const offerImage = req.files.offerImage && req.files.offerImage.length > 0 
+      ? req.files.offerImage[0].location 
+      : null; // Get the S3 URL
+
+    // Access heroImages paths
+    const heroImages = req.files.heroImages 
+      ? req.files.heroImages.map(file => file.location) 
+      : []; // Get S3 URLs
+
+    // console.log('Offer Image:', offerImage); 
+    // console.log('Hero Images:', heroImages); 
+
+    // Create a new setting with the images
+    const newSetting = new Setting({
+      offerImage,
+      heroImages, // Array of hero image paths
+    });
+
+    const savedSetting = await newSetting.save();
+    res.status(201).json({
+      success: true,
+      message: 'Setting created successfully',
+      data: savedSetting,
+    });
+  } catch (error) {
+    console.error('Error:', error); // Log error for better debugging
+    res.status(500).json({
+      success: false,
+      message: 'Error creating setting',
+      error: error.message, // Provide error message for clarity
+    });
+  }
+};
+
+// Get all settings
+export const getSettings = async (req, res) => {
+  try {
+      const settings = await Setting.find();
+      res.status(200).json({ success: true, data: settings });
+  } catch (error) {
+      res.status(500).json({ success: false, message: "Error fetching settings", error });
+  }
+};
+
+// Update a setting by ID
+export const updateSetting = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updateData = {}; // Initialize an object to hold update fields
+    let offerImage;
+    let heroImages = []; // Initialize as an array
+
+    // Check if offerImage file exists and assign its location
+    if (req.files && req.files.offerImage && req.files.offerImage.length > 0) {
+      offerImage = req.files.offerImage[0].location;
+      updateData.offerImage = offerImage; // Add to update object
+    }
+
+    // Check if heroImages files exist and map to get their locations
+    if (req.files && req.files.heroImages && req.files.heroImages.length > 0) {
+      heroImages = req.files.heroImages.map(file => file.location); // Collect all image locations
+      updateData.heroImages = heroImages; // Add to update object
+    }
+
+    // Extract offerHeading and heroHeading from request body
+    if (req.body.offerHeading) {
+      updateData.offerHeading = req.body.offerHeading; // Add to update object
+    }
+
+    if (req.body.heroHeading) {
+      updateData.heroHeading = req.body.heroHeading; // Add to update object
+    }
+
+    // Update only if there's something to update
+    const updatedSetting = await Setting.findByIdAndUpdate(
+      id,
+      updateData, // Use the update object
+      { new: true }  // Return the updated document
+    );
+
+    if (!updatedSetting) {
+      return res.status(404).json({ success: false, message: "Setting not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Setting updated successfully", data: updatedSetting });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating setting", error });
+  }
+};
+
+
+
 
 
 
